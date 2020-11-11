@@ -18,6 +18,22 @@ release:
 	docker build --no-cache -t aws-fluent-bit-plugins:latest -f Dockerfile.plugins .
 	docker build -t amazon/aws-for-fluent-bit:latest -f Dockerfile .
 
+plugins.tgz: bin/kinesis.so bin/firehose.so bin/cloudwatch.so
+	tar --strip-components 1 -zcvf plugins.tgz bin/kinesis.so bin/firehose.so bin/cloudwatch.so
+
+bin/kinesis.so:
+	mkdir -p bin
+	docker cp $(shell docker create --rm aws-fluent-bit-plugins:latest):/kinesis-streams/bin/kinesis.so bin/
+
+bin/firehose.so:
+	mkdir -p bin
+	docker cp $(shell docker create --rm aws-fluent-bit-plugins:latest):/kinesis-firehose/bin/firehose.so bin/
+
+bin/cloudwatch.so:
+	mkdir -p bin
+	docker cp $(shell docker create --rm aws-fluent-bit-plugins:latest):/cloudwatch/bin/cloudwatch.so bin/
+
+
 .PHONY: cloudwatch-dev
 cloudwatch-dev:
 	docker build \
